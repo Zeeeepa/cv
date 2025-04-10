@@ -6,6 +6,7 @@
     <title>CV Generator</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/formatting.css') }}">
 </head>
 <body>
     <div class="container-fluid">
@@ -70,6 +71,21 @@
                         </div>
                         <button id="export-json" class="btn btn-outline-secondary btn-sm w-100">Export as JSON</button>
                     </div>
+                    <div class="mb-4">
+                        <h5>Formatting Help</h5>
+                        <div class="formatting-help">
+                            <p>You can use Markdown in description fields:</p>
+                            <ul>
+                                <li><code>**bold**</code> for <strong>bold</strong></li>
+                                <li><code>*italic*</code> for <em>italic</em></li>
+                                <li><code>- item</code> for bullet lists</li>
+                                <li><code>1. item</code> for numbered lists</li>
+                                <li><code># Heading</code> for headings</li>
+                                <li><code>[link](url)</code> for links</li>
+                            </ul>
+                            <p>Or use the formatting toolbar above each text area.</p>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -127,7 +143,10 @@
 
                         <h4 class="mt-4 mb-3">Summary</h4>
                         <div class="mb-3">
-                            <textarea class="form-control" id="summary" name="summary" rows="3"></textarea>
+                            <textarea class="form-control formatting-enabled" id="summary" name="summary" rows="3"></textarea>
+                            <div class="formatting-help mt-1">
+                                <small>Supports Markdown formatting. Use the toolbar above or write Markdown directly.</small>
+                            </div>
                         </div>
 
                         <h4 class="mt-4 mb-3">Work Experience</h4>
@@ -206,7 +225,16 @@
                 </div>
                 <div class="mb-3">
                     <label class="form-label">Description (one item per line)</label>
-                    <textarea class="form-control" name="work_description[]" rows="3"></textarea>
+                    <textarea class="form-control formatting-enabled" name="work_description[]" rows="3"></textarea>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Formatting Style</label>
+                    <select class="form-select format-select" data-format="section-format">
+                        <option value="plain">Plain Text</option>
+                        <option value="markdown">Markdown</option>
+                        <option value="latex">LaTeX</option>
+                    </select>
+                    <input type="hidden" name="work_format[]" value="plain">
                 </div>
             </div>
         </div>
@@ -236,7 +264,16 @@
                 </div>
                 <div class="mb-3">
                     <label class="form-label">Description (one item per line)</label>
-                    <textarea class="form-control" name="edu_description[]" rows="3"></textarea>
+                    <textarea class="form-control formatting-enabled" name="edu_description[]" rows="3"></textarea>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Formatting Style</label>
+                    <select class="form-select format-select" data-format="section-format">
+                        <option value="plain">Plain Text</option>
+                        <option value="markdown">Markdown</option>
+                        <option value="latex">LaTeX</option>
+                    </select>
+                    <input type="hidden" name="edu_format[]" value="plain">
                 </div>
             </div>
         </div>
@@ -253,6 +290,15 @@
                 <div class="mb-3">
                     <label class="form-label">Skills (comma separated)</label>
                     <input type="text" class="form-control" name="skill_list[]">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Formatting Style</label>
+                    <select class="form-select format-select" data-format="section-format">
+                        <option value="plain">Plain Text</option>
+                        <option value="bold">Bold</option>
+                        <option value="italic">Italic</option>
+                    </select>
+                    <input type="hidden" name="skill_format[]" value="plain">
                 </div>
             </div>
         </div>
@@ -282,7 +328,16 @@
                 </div>
                 <div class="mb-3">
                     <label class="form-label">Description (one item per line)</label>
-                    <textarea class="form-control" name="cert_description[]" rows="3"></textarea>
+                    <textarea class="form-control formatting-enabled" name="cert_description[]" rows="3"></textarea>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Formatting Style</label>
+                    <select class="form-select format-select" data-format="section-format">
+                        <option value="plain">Plain Text</option>
+                        <option value="markdown">Markdown</option>
+                        <option value="latex">LaTeX</option>
+                    </select>
+                    <input type="hidden" name="cert_format[]" value="plain">
                 </div>
             </div>
         </div>
@@ -310,6 +365,15 @@
                         <input type="text" class="form-control" name="honor_date[]">
                     </div>
                 </div>
+                <div class="mb-3">
+                    <label class="form-label">Formatting Style</label>
+                    <select class="form-select format-select" data-format="section-format">
+                        <option value="plain">Plain Text</option>
+                        <option value="bold">Bold</option>
+                        <option value="italic">Italic</option>
+                    </select>
+                    <input type="hidden" name="honor_format[]" value="plain">
+                </div>
             </div>
         </div>
     </template>
@@ -317,5 +381,6 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/formatting.js') }}"></script>
 </body>
 </html>
