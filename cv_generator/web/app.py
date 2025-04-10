@@ -22,6 +22,7 @@ from flask import Flask, render_template, request, jsonify, send_file, url_for, 
 from werkzeug.utils import secure_filename
 from cv_generator import CVGenerator
 from style_generator import generate_styled_cv
+from style_library import get_all_styles, get_style_families, get_random_style
 
 app = Flask(__name__, 
             static_folder='static',
@@ -40,34 +41,24 @@ OUTPUT_FOLDER.mkdir(exist_ok=True)
 PREVIEW_FOLDER = Path(__file__).parent / 'static/previews'
 PREVIEW_FOLDER.mkdir(exist_ok=True)
 
-# Available styles
-STYLES = [
-    "emerald", 
-    "skyblue", 
-    "red", 
-    "pink", 
-    "orange", 
-    "nephritis", 
-    "concrete", 
-    "darknight"
-]
-
-# Style colors (matching the awesome-cv.cls definitions)
-STYLE_COLORS = {
-    "emerald": "#00A388",
-    "skyblue": "#0395DE",
-    "red": "#DC3522",
-    "pink": "#EF4089",
-    "orange": "#FF6138",
-    "nephritis": "#27AE60",
-    "concrete": "#95A5A6",
-    "darknight": "#131A28"
-}
+# Get all available styles from the style library
+STYLES = list(get_all_styles().keys())
+STYLE_COLORS = get_all_styles()
+STYLE_FAMILIES = get_style_families()
 
 @app.route('/')
 def index():
     """Render the main page."""
-    return render_template('index.html', styles=STYLES, style_colors=STYLE_COLORS)
+    return render_template('index.html', 
+                          styles=STYLES, 
+                          style_colors=STYLE_COLORS,
+                          style_families=STYLE_FAMILIES)
+
+@app.route('/random_style', methods=['GET'])
+def random_style():
+    """Get a random style."""
+    style_name, color_hex = get_random_style()
+    return jsonify({'success': True, 'style': style_name, 'color': color_hex})
 
 @app.route('/upload', methods=['POST'])
 def upload_file():
