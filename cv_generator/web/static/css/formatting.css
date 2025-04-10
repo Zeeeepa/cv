@@ -1,0 +1,87 @@
+/* Formatting toolbar styles */
+.formatting-toolbar {
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    padding: 5px;
+    margin-bottom: 10px;
+}
+
+.formatting-toolbar .btn-group {
+    margin-right: 5px;
+}
+
+.formatting-toolbar .btn {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+}
+
+.formatting-toolbar .btn i {
+    font-size: 1rem;
+}
+
+/* Format selection styles */
+.format-select {
+    width: 100%;
+    margin-bottom: 10px;
+}
+
+/* Formatting help tooltip */
+.formatting-help {
+    font-size: 0.875rem;
+    color: #6c757d;
+    margin-top: 5px;
+}
+
+.formatting-help code {
+    background-color: #f8f9fa;
+    padding: 2px 4px;
+    border-radius: 3px;
+    font-size: 0.8125rem;
+}
+
+/* Markdown preview styles */
+.markdown-preview {
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    padding: 10px;
+    margin-top: 10px;
+    background-color: #fff;
+}
+
+.markdown-preview h1,
+.markdown-preview h2,
+.markdown-preview h3 {
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.markdown-preview ul,
+.markdown-preview ol {
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
+    padding-left: 1.5rem;
+}
+
+/* Format options panel */
+.format-options-panel {
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    padding: 10px;
+    margin-bottom: 15px;
+}
+
+.format-options-panel h5 {
+    font-size: 1rem;
+    margin-bottom: 10px;
+}
+
+.format-options-panel .form-label {
+    font-size: 0.875rem;
+}
+
+/* Formatting enabled textareas */
+.formatting-enabled {
+    min-height: 100px;
+}

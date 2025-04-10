@@ -6,6 +6,7 @@ This application provides a web interface for the CV Generator, allowing users t
 1. Input CV data in JSON or text format
 2. Preview different CV styles
 3. Generate and download CVs in PDF format
+4. Apply advanced formatting options to CV content
 """
 
 import os
@@ -23,6 +24,11 @@ from werkzeug.utils import secure_filename
 from cv_generator import CVGenerator
 from style_generator import generate_styled_cv
 from style_library import get_all_styles, get_style_families, get_random_style
+from formatting_utils import (
+    format_bold, format_italic, format_underline, format_color,
+    format_text, markdown_to_latex, FONT_STYLES, FONT_WEIGHTS,
+    FONT_SHAPES, FONT_SIZES
+)
 
 app = Flask(__name__, 
             static_folder='static',
@@ -46,19 +52,58 @@ STYLES = list(get_all_styles().keys())
 STYLE_COLORS = get_all_styles()
 STYLE_FAMILIES = get_style_families()
 
+# Formatting options
+FORMATTING_OPTIONS = {
+    'font_styles': FONT_STYLES,
+    'font_weights': FONT_WEIGHTS,
+    'font_shapes': FONT_SHAPES,
+    'font_sizes': FONT_SIZES,
+}
+
 @app.route('/')
 def index():
     """Render the main page."""
     return render_template('index.html', 
                           styles=STYLES, 
                           style_colors=STYLE_COLORS,
-                          style_families=STYLE_FAMILIES)
+                          style_families=STYLE_FAMILIES,
+                          formatting_options=FORMATTING_OPTIONS)
 
 @app.route('/random_style', methods=['GET'])
 def random_style():
     """Get a random style."""
     style_name, color_hex = get_random_style()
     return jsonify({'success': True, 'style': style_name, 'color': color_hex})
+
+@app.route('/format_text', methods=['POST'])
+def format_text_endpoint():
+    """Format text with specified formatting options."""
+    data = request.get_json()
+    text = data.get('text', '')
+    format_type = data.get('format_type', '')
+    options = data.get('options', {})
+    
+    if format_type == 'bold':
+        result = format_bold(text)
+    elif format_type == 'italic':
+        result = format_italic(text)
+    elif format_type == 'underline':
+        result = format_underline(text)
+    elif format_type == 'color':
+        color = options.get('color', 'black')
+        result = format_color(text, color)
+    elif format_type == 'custom':
+        style = options.get('style')
+        weight = options.get('weight')
+        shape = options.get('shape')
+        size = options.get('size')
+        result = format_text(text, style, weight, shape, size)
+    elif format_type == 'markdown':
+        result = markdown_to_latex(text)
+    else:
+        result = text
+    
+    return jsonify({'success': True, 'formatted_text': result})
 
 @app.route('/upload', methods=['POST'])
 def upload_file():
@@ -105,6 +150,7 @@ def generate_cv():
         work_locations = request.form.getlist('work_location[]')
         work_dates = request.form.getlist('work_date[]')
         work_descriptions = request.form.getlist('work_description[]')
+        work_formats = request.form.getlist('work_format[]')
         
         for i in range(len(work_titles)):
             if work_titles[i]:
@@ -113,7 +159,8 @@ def generate_cv():
                     'Company': work_companies[i] if i < len(work_companies) else '',
                     'Location': work_locations[i] if i < len(work_locations) else '',
                     'Date': work_dates[i] if i < len(work_dates) else '',
-                    'items': [item.strip() for item in work_descriptions[i].split('\n') if item.strip()] if i < len(work_descriptions) else []
+                    'items': [item.strip() for item in work_descriptions[i].split('\n') if item.strip()] if i < len(work_descriptions) else [],
+                    'format': work_formats[i] if i < len(work_formats) else 'plain'
                 }
                 work_experience.append(job)
         
@@ -126,6 +173,7 @@ def generate_cv():
         edu_locations = request.form.getlist('edu_location[]')
         edu_dates = request.form.getlist('edu_date[]')
         edu_descriptions = request.form.getlist('edu_description[]')
+        edu_formats = request.form.getlist('edu_format[]')
         
         for i in range(len(edu_degrees)):
             if edu_degrees[i]:
@@ -134,7 +182,8 @@ def generate_cv():
                     'Institution': edu_institutions[i] if i < len(edu_institutions) else '',
                     'Location': edu_locations[i] if i < len(edu_locations) else '',
                     'Date': edu_dates[i] if i < len(edu_dates) else '',
-                    'items': [item.strip() for item in edu_descriptions[i].split('\n') if item.strip()] if i < len(edu_descriptions) else []
+                    'items': [item.strip() for item in edu_descriptions[i].split('\n') if item.strip()] if i < len(edu_descriptions) else [],
+                    'format': edu_formats[i] if i < len(edu_formats) else 'plain'
                 }
                 education.append(edu)
         
@@ -144,12 +193,14 @@ def generate_cv():
         skills = []
         skill_categories = request.form.getlist('skill_category[]')
         skill_lists = request.form.getlist('skill_list[]')
+        skill_formats = request.form.getlist('skill_format[]')
         
         for i in range(len(skill_categories)):
             if skill_categories[i]:
                 skill = {
                     'Category': skill_categories[i],
-                    'Skills': skill_lists[i] if i < len(skill_lists) else ''
+                    'Skills': skill_lists[i] if i < len(skill_lists) else '',
+                    'format': skill_formats[i] if i < len(skill_formats) else 'plain'
                 }
                 skills.append(skill)
         
@@ -162,6 +213,7 @@ def generate_cv():
         cert_locations = request.form.getlist('cert_location[]')
         cert_dates = request.form.getlist('cert_date[]')
         cert_descriptions = request.form.getlist('cert_description[]')
+        cert_formats = request.form.getlist('cert_format[]')
         
         for i in range(len(cert_names)):
             if cert_names[i]:
@@ -170,7 +222,8 @@ def generate_cv():
                     'Issuer': cert_issuers[i] if i < len(cert_issuers) else '',
                     'Location': cert_locations[i] if i < len(cert_locations) else '',
                     'Date': cert_dates[i] if i < len(cert_dates) else '',
-                    'items': [item.strip() for item in cert_descriptions[i].split('\n') if item.strip()] if i < len(cert_descriptions) else []
+                    'items': [item.strip() for item in cert_descriptions[i].split('\n') if item.strip()] if i < len(cert_descriptions) else [],
+                    'format': cert_formats[i] if i < len(cert_formats) else 'plain'
                 }
                 certificates.append(cert)
         
@@ -182,6 +235,7 @@ def generate_cv():
         honor_issuers = request.form.getlist('honor_issuer[]')
         honor_locations = request.form.getlist('honor_location[]')
         honor_dates = request.form.getlist('honor_date[]')
+        honor_formats = request.form.getlist('honor_format[]')
         
         for i in range(len(honor_names)):
             if honor_names[i]:
@@ -189,7 +243,8 @@ def generate_cv():
                     'Name': honor_names[i],
                     'Issuer': honor_issuers[i] if i < len(honor_issuers) else '',
                     'Location': honor_locations[i] if i < len(honor_locations) else '',
-                    'Date': honor_dates[i] if i < len(honor_dates) else ''
+                    'Date': honor_dates[i] if i < len(honor_dates) else '',
+                    'format': honor_formats[i] if i < len(honor_formats) else 'plain'
                 }
                 honors.append(honor)
         

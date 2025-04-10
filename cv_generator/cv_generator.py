@@ -12,6 +12,7 @@ import argparse
 import re
 from pathlib import Path
 from typing import Dict, List, Any, Optional, Union
+from formatting_utils import apply_formatting_to_cv_data
 
 
 class CVGenerator:
@@ -51,7 +52,10 @@ class CVGenerator:
             Dictionary containing the parsed CV data
         """
         with open(json_file, "r") as f:
-            return json.load(f)
+            data = json.load(f)
+        
+        # Apply formatting to the data
+        return apply_formatting_to_cv_data(data)
     
     def parse_text_input(self, text_file: str) -> Dict[str, Any]:
         """
@@ -111,7 +115,8 @@ class CVGenerator:
                         current_list[-1]["items"] = []
                     current_list[-1]["items"].append(item_text)
         
-        return data
+        # Apply formatting to the data
+        return apply_formatting_to_cv_data(data)
     
     def generate_personal_info(self, data: Dict[str, Any]) -> str:
         """
