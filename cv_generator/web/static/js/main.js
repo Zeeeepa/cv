@@ -7,6 +7,11 @@ document.addEventListener('DOMContentLoaded', function() {
     const loadSampleBtn = document.getElementById('load-sample');
     const exportJsonBtn = document.getElementById('export-json');
     const importFileInput = document.getElementById('import-file');
+    const randomStyleBtn = document.getElementById('random-style');
+    
+    // Style elements
+    const currentStyleColor = document.getElementById('current-style-color');
+    const currentStyleName = document.getElementById('current-style-name');
     
     // Section containers
     const workExperienceContainer = document.getElementById('work-experience-container');
@@ -33,12 +38,29 @@ document.addEventListener('DOMContentLoaded', function() {
     const previewContent = document.getElementById('preview-content');
     
     // Current style
-    let currentStyle = document.querySelector('input[name="style"]:checked').value;
+    let currentStyle = document.querySelector('input[name="style"]:checked')?.value || 'red';
+    
+    // Update the current style display
+    function updateCurrentStyleDisplay() {
+        const styleRadio = document.querySelector(`input[name="style"][value="${currentStyle}"]`);
+        if (styleRadio) {
+            const styleLabel = styleRadio.nextElementSibling;
+            const styleColor = styleLabel.querySelector('.style-color').style.backgroundColor;
+            const styleName = styleLabel.querySelector('.style-name').textContent;
+            
+            currentStyleColor.style.backgroundColor = styleColor;
+            currentStyleName.textContent = styleName;
+        }
+    }
+    
+    // Initialize the current style display
+    updateCurrentStyleDisplay();
     
     // Add event listeners for style selection
     document.querySelectorAll('input[name="style"]').forEach(radio => {
         radio.addEventListener('change', function() {
             currentStyle = this.value;
+            updateCurrentStyleDisplay();
             
             // If we have a preview, update it with the new style
             if (downloadBtn.disabled === false) {
@@ -46,6 +68,50 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     });
+    
+    // Add event listener for random style button
+    if (randomStyleBtn) {
+        randomStyleBtn.addEventListener('click', function() {
+            // Show loading state
+            randomStyleBtn.disabled = true;
+            randomStyleBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Loading...';
+            
+            // Get a random style from the server
+            fetch('/random_style')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Update the current style
+                        currentStyle = data.style;
+                        
+                        // Select the corresponding radio button
+                        const styleRadio = document.querySelector(`input[name="style"][value="${currentStyle}"]`);
+                        if (styleRadio) {
+                            styleRadio.checked = true;
+                        }
+                        
+                        // Update the current style display
+                        currentStyleColor.style.backgroundColor = data.color;
+                        currentStyleName.textContent = data.style.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase());
+                        
+                        // If we have a preview, update it with the new style
+                        if (downloadBtn.disabled === false) {
+                            generateCV();
+                        }
+                    } else {
+                        console.error('Error getting random style:', data.error);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                })
+                .finally(() => {
+                    // Reset button state
+                    randomStyleBtn.disabled = false;
+                    randomStyleBtn.innerHTML = '<i class="bi bi-shuffle"></i> Random Style';
+                });
+        });
+    }
     
     // Add event listeners for section buttons
     if (addWorkBtn) addWorkBtn.addEventListener('click', () => addSection(workExperienceContainer, workTemplate));
